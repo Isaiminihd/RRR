@@ -1,0 +1,274 @@
+<?php
+
+define('IN_SABB', true);
+
+include_once('inc/init.html');
+
+$fid = $sabb->get_input('fid');
+
+$fid = mysql_escape($fid);
+
+$query = $db->simple_select("files", "*", "fid={$fid}");
+
+$file = $db->fetch_array($query);
+
+if(!$file)
+{
+
+exit;
+}
+
+
+$time = $file['time'];
+
+$added = date("d/m/Y", $time);
+
+$name = $file['name'];
+
+$imgname = $name;
+
+$file_id = $file['fid'];
+
+$filepath = $file['path'];
+
+$view = $file['view'];
+
+$server = $file['server'];
+
+$mlink = $file['link'];
+
+$moblink = $file['moblink'];
+
+$duration = $file['duration'];
+
+$format = $file['format'];
+
+$srtchk = strtolower($format);
+
+$videosize = $file['vsize'];
+
+$name = str_replace('.mp4','',$name);
+
+$name = str_replace('.3gp','',$name);
+
+$name = str_replace('.mkv','',$name);
+
+$title = "$name Download";
+
+$findserver = substr($server,0,1);
+
+$link = $server . ".uptofiles.net";
+
+if($view == 1) {
+if(!isAND()) {
+echo "<title>404 Not Found Error</title>";
+echo "<h2>404 Not Found Error<h2>";
+exit; 
+}
+}
+
+$vscr = $file_id . "-" . $imgname;
+
+$vscr = str_replace(" ", "-", $vscr);
+
+$vscr_path = "./shots/view/" . $vscr . ".jpg";
+
+
+$downloadhits = $db->simple_select("downloads", "fid", "fid='{$fid}'");
+
+$checkhits = $db->num_rows($downloadhits);
+
+
+if($checkhits == 0) {
+$db->insert_query("downloads", array('fid' => $db->escape_string($fid), 'hits' => 1));
+} 
+else { 
+$db->query("UPDATE downloads SET hits=hits+1 WHERE fid=".$fid.""); 
+}
+
+
+include_once('./header.php');
+
+if (file_exists($vscr_path)) {
+
+$img_url = "/shots/view/" . $vscr . ".jpg";
+
+}else {
+
+$img_url = "/img/default.jpg";
+
+}
+
+
+
+echo'<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "../connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.3";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, "script", "facebook-jssdk"));</script>';
+
+
+echo '<div class="line">Video Information</div>';
+
+echo '<div class="bf"><div class="tblimg"><img src="%27.%24img_url.html" width="120" height="90" alt="'.$name.' Screen Shot JPG" title="'.$name.'.jpg" /></div>
+
+<b>File Name:</b> '.$imgname.'
+<br/>
+<b>File Size:</b> '.convertsize($file['size']).'
+<br/>';
+
+if(!empty($duration) && !empty($videosize)){
+
+echo '<b>Video Size:</b> '.$videosize.'
+<br/> 
+<b>Format:</b> '.$file['format'].'
+<br/> 
+<b>Duration:</b> '.$duration.' min
+<br/>';
+
+}
+
+echo '<b>Added On:</b> '.$added.'
+<br/>
+<b>Facebook Page:</b> <div class="fb-like" data-href="https://www.facebook.com/isaimini.co" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false"></div>';
+
+if(is_admin())
+{
+$query2 = $db->simple_select("downloads", "hits", "fid={$fid}");
+
+$hits = $db->fetch_array($query2);
+
+$hits = $hits['hits'];
+
+echo'<br/> <b>Total Hits:</b> '.$hits.'';
+
+echo '<br/><a href="https://moviesdamob.net/AdMinCp570/files/addlink.php?fid='.$fid.'"><b>Add Random Links</b></a>';
+
+}
+
+
+$dlink = $link . "/" . $filepath;
+
+$dlink2 = $link . "/" . $filepath;
+
+
+if(strlen($mlink)>10){
+
+if (preg_match("/@@/i", $mlink)) {
+
+$getlink = explode("@@", $mlink);
+
+$count = (count($getlink)-1);
+
+$rand = rand(0,$count);
+
+$randlink = $getlink[$rand];
+
+$mlink = $randlink;
+
+}
+
+$dlink = $mlink;
+
+$dlink2 = $mlink;
+
+}
+
+
+if(in_array($srtchk, array('srt','txt','sub')))
+{
+
+$ssurl = $_SERVER['HTTP_HOST'];
+
+$dlink = "$ssurl/srt.php?id=$fid";
+
+$dlink2 = "$ssurl/srt.php?id=$fid";
+
+}
+
+
+
+
+//Mobile Users
+
+if(strlen($moblink)>10){
+
+$mobilink = $moblink;
+
+}
+
+$furl = "adscafe.xyz/dfile.php?id=$fid";
+
+
+echo '<div class="Adz">';
+
+
+echo '</div>';
+
+
+
+echo '<div><a rel="nofollow" href="http://'.$dlink.'/"><b><font color="green">Download Server-1</font></b></a></div>';
+
+
+echo '<div class="Adz">';
+
+include($ads1);
+
+echo '</div>';
+
+
+
+if(strlen($moblink)>10){
+
+?>
+
+<script type="text/javascript">
+if (screen.width <= 900) {
+document.write("<?php echo "<div><a rel='nofollow' href='$mobilink'><font color='red'><b>Download Server [New]</b></font></a></div>"; ?>");
+}</script>
+
+<?php
+
+
+}
+
+echo '<div><a rel="nofollow" href="ucdownloader6c1d.html?id='.$fid.'"><font color="green"><b>Download Server [UC Browser]</b></font></a></div>';
+
+
+echo '<div class="Adz">';
+
+//include($ads2);
+
+echo '</div>';
+
+
+echo '<div><a rel="nofollow" href="ucmini6c1d.html?id='.$fid.'"><font color="green"><b>Download Server [UC Mini]</b></font></a></div>';
+
+echo '<div class="Adz">';
+
+include ($ads2);
+
+echo '</div>';
+
+echo '<div><a rel="nofollow" href="http://'.$dlink2.'/"><b><font color="green">Download Server-2</font></b></a></div>';
+
+
+echo '<div class="Adz">';
+
+include ("./ads/aff.php");
+
+echo '</div>';
+
+
+echo '</div>';
+
+echo '</div>';
+
+include_once('./share.php');
+
+include_once('./footer.php');
+
+?>
